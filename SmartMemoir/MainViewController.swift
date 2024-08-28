@@ -27,6 +27,11 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
         print("--------图片和数据库调试内容分割线---------")
         loadPhotoDatabase()
     }
+
+    @IBAction func rebuildListButtonTapped(_ sender: UIButton) {
+        clearPhotoDatabase()
+        rebuildPhotoDatabase()
+    }
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
        if let selectedImage = info[.originalImage] as? UIImage {
@@ -98,6 +103,38 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
                 print("照片数据库已保存到: \(fileURL)")
             } catch {
                 print("保存照片数据库时出错: \(error)")
+            }
+        }
+    }
+
+    //特殊调试按键：一键清空数据库
+    func clearPhotoDatabase() {
+        photoDatabase.removeAll()
+        savePhotoDatabase()
+        print("照片数据库已清空")
+    }
+
+    func rebuildPhotoDatabase() {
+        // 获取文档目录路径
+        if let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+            do {
+                // 获取文档目录下的所有文件
+                let fileURLs = try FileManager.default.contentsOfDirectory(at: documentsDirectory, includingPropertiesForKeys: nil)
+                
+                // 遍历文件URLs以重建数据库
+                for url in fileURLs {
+                    let fileName = url.lastPathComponent
+                    let imageExtensions = ["jpg", "jpeg", "png", "gif", "bmp", "tiff"]
+                    if imageExtensions.contains(fileName.split(separator: ".").last?.lowercased() ?? "") {
+                        // 假设每个文件名对应的标签为文件名的数组（可以根据实际需求修改）
+                        let tags = [fileName] // 这里可以根据需要生成标签
+                        addPhoto(withName: fileName, tags: tags)
+                    }
+                }
+                savePhotoDatabase()
+                print("照片数据库已重新建立")
+            } catch {
+                print("重建照片数据库时出错: \(error.localizedDescription)")
             }
         }
     }
