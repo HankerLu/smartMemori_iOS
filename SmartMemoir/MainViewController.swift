@@ -24,6 +24,8 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
 
     @IBAction func debugListButtonTapped(_ sender: UIButton) {
         searchAllPhoto()
+        print("--------图片和数据库调试内容分割线---------")
+        loadPhotoDatabase()
     }
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
@@ -41,9 +43,14 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
                     do {
                         try data.write(to: fileURL)
                         print("图片已保存到: \(fileURL)")
-                        let tags: [String] = [] // 可以根据需要添加标签
+
+                        let currentTime = Date() // 获取当前时间
+                        let photoURL = fileName // 获取照片文件名
+                        let tags: [String] = ["路径: \(photoURL)", "保存时间: \(currentTime)"] // 保存照片地址和当前时间
                         addPhoto(withName: fileName, tags: tags)
-                        print("选择的图片已保存内部数据库: \(fileName)")
+                        savePhotoDatabase()
+                        // print("选择的图片已保存内部数据库: \(fileName)")
+
                     } catch {
                         print("保存图片时出错: \(error)")
                     }
@@ -76,6 +83,40 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
         if var tags = photoDatabase[name] {
             tags.append(contentsOf: newTags)
             photoDatabase[name] = tags
+        }
+    }
+
+    func savePhotoDatabase() {
+        // 获取文档目录路径
+        if let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+            let fileURL = documentsDirectory.appendingPathComponent("photoDatabase.json")
+            do {
+                // 将photoDatabase转换为JSON数据
+                let jsonData = try JSONSerialization.data(withJSONObject: photoDatabase, options: .prettyPrinted)
+                // 将JSON数据写入文件
+                try jsonData.write(to: fileURL)
+                print("照片数据库已保存到: \(fileURL)")
+            } catch {
+                print("保存照片数据库时出错: \(error)")
+            }
+        }
+    }
+
+    func loadPhotoDatabase() {
+        // 获取文档目录路径
+        if let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+            let fileURL = documentsDirectory.appendingPathComponent("photoDatabase.json")
+            do {
+                // 读取JSON数据
+                let jsonData = try Data(contentsOf: fileURL)
+                // 将JSON数据转换为字典
+                if let json = try JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: [String]] {
+                    photoDatabase = json
+                    print("照片数据库已加载: \(photoDatabase)")
+                }
+            } catch {
+                print("加载照片数据库时出错: \(error)")
+            }
         }
     }
 
