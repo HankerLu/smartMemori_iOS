@@ -196,3 +196,32 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
     */
 
 }
+
+/// 管理长期激励系统的类
+class LongTermIncentiveManager {
+    private var incentives: [String: Int] = [:] // 存储每个标签的激励点数
+
+    /// 为指定标签添加激励点数
+    /// - Parameters:
+    ///   - tag: 标签名称
+    ///   - points: 激励点数
+    func addIncentive(forTag tag: String, points: Int) {
+        incentives[tag, default: 0] += points
+        print("为标签 '\(tag)' 添加了 \(points) 点激励。当前总激励: \(incentives[tag]!)")
+    }
+
+    /// 获取指定标签的激励点数
+    /// - Parameter tag: 标签名称
+    /// - Returns: 激励点数
+    func getIncentive(forTag tag: String) -> Int {
+        return incentives[tag, default: 0]
+    }
+
+    /// 显示所有标签的激励点数
+    func displayAllIncentives() {
+        for (tag, points) in incentives {
+            print("标签: '\(tag)', 激励点数: \(points)")
+        }
+    }
+}
+
