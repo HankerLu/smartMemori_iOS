@@ -126,8 +126,9 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
                     let fileName = url.lastPathComponent
                     let imageExtensions = ["jpg", "jpeg", "png", "gif", "bmp", "tiff"]
                     if imageExtensions.contains(fileName.split(separator: ".").last?.lowercased() ?? "") {
-                        // 假设每个文件名对应的标签为文件名的数组（可以根据实际需求修改）
-                        let tags = [fileName] // 这里可以根据需要生成标签
+                        let currentTime = Date() // 获取当前时间
+                        let photoURL = fileName // 获取照片文件名
+                        let tags: [String] = ["路径: \(photoURL)", "保存时间: \(currentTime)"] // 保存照片地址和当前时间
                         addPhoto(withName: fileName, tags: tags)
                     }
                 }
