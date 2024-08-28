@@ -13,6 +13,7 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
     @IBOutlet weak var mainImageView: UIImageView!
     @IBOutlet weak var selectButton: UIButton!
     @IBOutlet weak var switchButton: UIButton!
+    @IBOutlet weak var debugListButton: UIButton!
     
     @IBAction func selectButtonTapped(_ sender: UIButton) {
         let imagePicker = UIImagePickerController()
@@ -20,10 +21,34 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
         imagePicker.sourceType = .photoLibrary
         present(imagePicker, animated: true, completion: nil)
     }
+
+    @IBAction func debugListButtonTapped(_ sender: UIButton) {
+        searchAllPhoto()
+    }
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
        if let selectedImage = info[.originalImage] as? UIImage {
            mainImageView.image = selectedImage
+           
+            // 获取文档目录路径
+            if let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+                // 创建文件名
+                let fileName = UUID().uuidString + ".png"
+                let fileURL = documentsDirectory.appendingPathComponent(fileName)
+                
+                // 将图片转换为PNG数据并写入文件
+                if let data = selectedImage.pngData() {
+                    do {
+                        try data.write(to: fileURL)
+                        print("图片已保存到: \(fileURL)")
+                        let tags: [String] = [] // 可以根据需要添加标签
+                        addPhoto(withName: fileName, tags: tags)
+                        print("选择的图片已保存内部数据库: \(fileName)")
+                    } catch {
+                        print("保存图片时出错: \(error)")
+                    }
+                }
+            }
        }
        dismiss(animated: true, completion: nil)
    }
@@ -51,6 +76,25 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
         if var tags = photoDatabase[name] {
             tags.append(contentsOf: newTags)
             photoDatabase[name] = tags
+        }
+    }
+
+    
+    func searchAllPhoto() {
+        // 获取文档目录路径
+        if let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
+            do {
+                // 获取文档目录下的所有文件
+                let fileURLs = try FileManager.default.contentsOfDirectory(at: documentsDirectory, includingPropertiesForKeys: nil)
+                
+                // 遍历文件URLs以获取已存储的照片
+                for url in fileURLs {
+                    // 处理每个文件的逻辑，这里可以是加载到界面上或者其他操作
+                    print("已存储的照片文件: \(url.lastPathComponent)")
+                }
+            } catch {
+                print("Error while enumerating files \(documentsDirectory.path): \(error.localizedDescription)")
+            }
         }
     }
 
