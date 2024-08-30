@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import Speech
 
 
 class MainViewController: UIViewController, UIImagePickerControllerDelegate & UINavigationControllerDelegate {
@@ -14,6 +15,7 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
     @IBOutlet weak var selectButton: UIButton!
     @IBOutlet weak var switchButton: UIButton!
     @IBOutlet weak var debugListButton: UIButton!
+    @IBOutlet weak var speechButton: UIButton!
     
     @IBAction func selectButtonTapped(_ sender: UIButton) {
         let imagePicker = UIImagePickerController()
@@ -31,6 +33,123 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
     @IBAction func rebuildListButtonTapped(_ sender: UIButton) {
         clearPhotoDatabase()
         rebuildPhotoDatabase()
+    }
+
+    @IBAction func speechButtonTapped(_ sender: UIButton) {
+        print("语音识别按钮被点击")
+        DispatchQueue.global(qos: .userInitiated).async {
+            print("开始语音识别, 创建语音识别任务")
+            self.startSpeechRecognition()
+        }
+    }
+    
+
+    //待在真机上验证
+    private func startSpeechRecognition() {
+        guard let speechRecognizer = SFSpeechRecognizer(locale: Locale(identifier: "zh-CN")) else {
+            print("语音识别器不可用")
+            return
+        }
+        
+        let request = SFSpeechAudioBufferRecognitionRequest()
+        request.shouldReportPartialResults = true
+        
+        // 创建语音识别任务
+        let recognitionTask = speechRecognizer.recognitionTask(with: request) { (result, error) in
+            if let result = result {
+                let spokenText = result.bestTranscription.formattedString
+                print("识别的文本: \(spokenText)")
+            }
+            if let error = error {
+                print("语音识别发生错误: \(error.localizedDescription)")
+            }
+        }
+        
+        // 开始录音
+        let audioEngine = AVAudioEngine()
+        let inputNode = audioEngine.inputNode
+        
+        // 设置音频会话
+        let audioSession = AVAudioSession.sharedInstance()
+        do {
+            try audioSession.setCategory(.record, mode: .measurement, options: .duckOthers)
+            try audioSession.setActive(true, options: .notifyOthersOnDeactivation)
+        } catch {
+            print("设置音频会话失败: \(error.localizedDescription)")
+            return
+        }
+        
+        // 设置录音格式
+        let recordingFormat = AVAudioFormat(standardFormatWithSampleRate: 44100, channels: 1)
+        
+        inputNode.installTap(onBus: 0, bufferSize: 1024, format: recordingFormat) { (buffer, when) in
+            request.append(buffer)
+        }
+        
+        audioEngine.prepare()
+        
+        do {
+            try audioEngine.start()
+        } catch {
+            print("音频引擎启动失败: \(error.localizedDescription)")
+            recognitionTask.cancel()
+        }
+    }
+
+    
+    func sendZhipuAiRequest(messages: [[String: String]], completion: @escaping (Result<String, Error>) -> Void) {
+        let urlString = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
+        guard let url = URL(string: urlString) else {
+            completion(.failure(NSError(domain: "无效的URL", code: 0, userInfo: nil)))
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        let parameters: [String: Any] = [
+            "model": "your_model_code_here",
+            "messages": messages,
+            "stream": false,
+            "temperature": 0.95,
+            "top_p": 0.7
+        ]
+        
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: parameters)
+        } catch {
+            completion(.failure(error))
+            return
+        }
+        
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            
+            guard let data = data else {
+                completion(.failure(NSError(domain: "没有数据返回", code: 0, userInfo: nil)))
+                return
+            }
+            
+            do {
+                if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                   let choices = json["choices"] as? [[String: Any]],
+                   let firstChoice = choices.first,
+                   let message = firstChoice["message"] as? [String: Any],
+                   let content = message["content"] as? String {
+                    completion(.success(content))
+                } else {
+                    completion(.failure(NSError(domain: "无法解析响应", code: 0, userInfo: nil)))
+                }
+            } catch {
+                completion(.failure(error))
+            }
+        }
+        
+        task.resume()
     }
     
     func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {

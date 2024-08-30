@@ -72,6 +72,15 @@
                                     <action selector="rebuildListButtonTapped:" destination="WhH-ZP-D41" eventType="touchUpInside" id="t4k-WJ-2ez"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3ph-nX-vtX">
+                                <rect key="frame" x="171" y="730" width="56" height="35"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" title="TTS"/>
+                                <connections>
+                                    <action selector="speechButtonTapped:" destination="WhH-ZP-D41" eventType="touchUpInside" id="tFD-uG-ydm"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="RQ6-yf-6jC"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -80,6 +89,7 @@
                         <outlet property="debugListButton" destination="rsX-IL-UWm" id="E1s-ps-2xX"/>
                         <outlet property="mainImageView" destination="D9M-ez-ezs" id="hqR-jo-VsS"/>
                         <outlet property="selectButton" destination="Fnb-oh-sq8" id="dTD-fu-MBD"/>
+                        <outlet property="speechButton" destination="3ph-nX-vtX" id="cbN-wS-SOH"/>
                         <outlet property="switchButton" destination="AZh-f4-E4o" id="rb8-mT-7MU"/>
                     </connections>
                 </viewController>
