@@ -489,6 +489,7 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
                 tags.append(tag)
                 photoDatabase[currentPhotoFileName] = tags
                 print("已为照片 \(currentPhotoFileName) 添加标签: \(tag)")
+                savePhotoDatabase()
             } else {
                 print("照片 \(currentPhotoFileName) 的标签添加失败")
             }
