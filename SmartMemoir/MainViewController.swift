@@ -121,7 +121,7 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
         sendZhipuAiRequestStream(messages: [["role": "user", "content": final_content]]) { result in
             switch result {
             case .success(let content):
-                print("智谱AI返回内容(流式传输): \(content)")
+                // print("智谱AI返回内容(流式传输): \(content)")
                 // 处理流式响应
                 if let data = content.data(using: .utf8) {
                     self.handleStreamResponse(data: data)
@@ -135,6 +135,8 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
     
     // 处理流式响应的函数
     func handleStreamResponse(data: Data) {
+        print("处理流式响应")
+        
         // 将数据转换为字符串
         guard let string = String(data: data, encoding: .utf8) else {
             print("无法将数据转换为字符串")
@@ -213,6 +215,7 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
         
         // 创建并执行网络请求任务
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            print("流式传输")
             if let error = error {
                 completion(.failure(error))
                 return
@@ -221,7 +224,6 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
                 completion(.failure(NSError(domain: "没有数据返回", code: 0, userInfo: nil)))
                 return
             }
-            print("流式传输")
             // print("原始返回的报文内容: \(String(data: data, encoding: .utf8) ?? "无法解析")")
             completion(.success(String(data: data, encoding: .utf8) ?? "无法解析"))
         }
