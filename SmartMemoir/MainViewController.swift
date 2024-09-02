@@ -9,7 +9,7 @@ import UIKit
 import Speech
 
 
-class MainViewController: UIViewController, UIImagePickerControllerDelegate & UINavigationControllerDelegate {
+class MainViewController: UIViewController, UIImagePickerControllerDelegate & UINavigationControllerDelegate, URLSessionDataDelegate {
 
     @IBOutlet weak var mainImageView: UIImageView!
     @IBOutlet weak var selectButton: UIButton!
@@ -212,25 +212,59 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
             completion(.failure(error))
             return
         }
-        
-        // 创建并执行网络请求任务
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
-            print("流式传输")
-            if let error = error {
-                completion(.failure(error))
-                return
-            }
-            guard let data = data else {
-                completion(.failure(NSError(domain: "没有数据返回", code: 0, userInfo: nil)))
-                return
-            }
-            // print("原始返回的报文内容: \(String(data: data, encoding: .utf8) ?? "无法解析")")
-            completion(.success(String(data: data, encoding: .utf8) ?? "无法解析"))
-        }
-        
-        // 开始网络请求任务
-        print("开始网络请求任务")
+
+        let session = URLSession(configuration: .default, delegate: self, delegateQueue: nil)
+        let task = session.dataTask(with: request)
         task.resume()
+        // // 创建并执行网络请求任务
+        // let task = URLSession.shared.dataTask(with: request) { data, response, error in
+        //     print("流式传输")
+        //     if let error = error {
+        //         completion(.failure(error))
+        //         return
+        //     }
+        //     guard let data = data else {
+        //         completion(.failure(NSError(domain: "没有数据返回", code: 0, userInfo: nil)))
+        //         return
+        //     }
+        //     // print("原始返回的报文内容: \(String(data: data, encoding: .utf8) ?? "无法解析")")
+        //     completion(.success(String(data: data, encoding: .utf8) ?? "无法解析"))
+        // }
+        
+        // // 开始网络请求任务
+        // print("开始网络请求任务")
+        // task.resume()
+    }
+
+        // URLSessionDataDelegate 方法
+    func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
+        if let string = String(data: data, encoding: .utf8) {
+            let lines = string.components(separatedBy: "\n")
+            for line in lines {
+                if line.hasPrefix("data: ") {
+                    let content = String(line.dropFirst(6))
+                    if content == "[DONE]" {
+                        print("\n流式响应结束")
+                        // 在这里处理响应结束的逻辑
+                    } else {
+                        // 尝试解析 JSON 内容
+                        do {
+                            if let jsonData = content.data(using: .utf8),
+                               let json = try JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any],
+                               let choices = json["choices"] as? [[String: Any]],
+                               let firstChoice = choices.first,
+                               let delta = firstChoice["delta"] as? [String: String],
+                               let text = delta["content"] {
+                                print(text, terminator: "")
+                                // 在这里处理接收到的内容片段
+                            }
+                        } catch {
+                            print("解析 JSON 时出错：\(error)")
+                        }
+                    }
+                }
+            }
+        }
     }
 
     // 发送智谱AI消息并获取回调
