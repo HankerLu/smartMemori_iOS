@@ -17,6 +17,7 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
     @IBOutlet weak var debugListButton: UIButton!
     @IBOutlet weak var speechButton: UIButton!
     @IBOutlet weak var sendAIButton: UIButton!
+    @IBOutlet weak var randomPhotoButton: UIButton!
     
     @IBAction func selectButtonTapped(_ sender: UIButton) {
         let imagePicker = UIImagePickerController()
@@ -375,6 +376,38 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
         }
     }
 
+    @IBAction func randomPhotoButtonTapped(_ sender: UIButton) {
+        loadRandomPhoto()
+    }
+
+    func loadRandomPhoto() {
+        // 检查photoDatabase是否为空
+        if photoDatabase.isEmpty {
+            print("照片数据库为空，无法加载照片。")
+            return
+        }
+        
+        // 从photoDatabase中随机选择一张照片
+        let randomIndex = Int.random(in: 0..<photoDatabase.count)
+        print("随机索引: \(randomIndex), 随机照片数量: \(photoDatabase.count)")
+        
+        let randomPhotoKey = Array(photoDatabase.keys)[randomIndex]
+        
+        // 获取照片的URL
+        let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+        let photoURL = documentsDirectory.appendingPathComponent(randomPhotoKey)
+        
+        // 加载照片到mainImageView中
+        do {
+            let imageData = try Data(contentsOf: photoURL)
+            let image = UIImage(data: imageData)!
+            mainImageView.image = image
+            print("已加载照片: \(randomPhotoKey)")
+        } catch {
+            print("加载照片时出错: \(error)")
+        }
+    }
+
     func savePhotoDatabase() {
         // 获取文档目录路径
         if let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
@@ -463,6 +496,7 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
 
     override func viewDidLoad() {
         super.viewDidLoad()
+        loadPhotoDatabase()
 
         // Do any additional setup after loading the view.
     }

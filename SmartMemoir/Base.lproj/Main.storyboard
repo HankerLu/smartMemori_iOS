@@ -72,7 +72,7 @@
                                     <action selector="rebuildListButtonTapped:" destination="WhH-ZP-D41" eventType="touchUpInside" id="t4k-WJ-2ez"/>
                                 </connections>
                             </button>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3ph-nX-vtX">
+                            <button hidden="YES" opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="3ph-nX-vtX">
                                 <rect key="frame" x="171" y="730" width="56" height="35"/>
                                 <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                 <state key="normal" title="Button"/>
@@ -90,6 +90,15 @@
                                     <action selector="zhipuAIButtonTapped:" destination="WhH-ZP-D41" eventType="touchUpInside" id="6LA-hy-OYv"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="qhM-yM-qO0">
+                                <rect key="frame" x="158" y="730" width="80" height="35"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" title="Display"/>
+                                <connections>
+                                    <action selector="randomPhotoButtonTapped:" destination="WhH-ZP-D41" eventType="touchUpInside" id="AKq-gG-lQf"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="RQ6-yf-6jC"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -97,6 +106,7 @@
                     <connections>
                         <outlet property="debugListButton" destination="rsX-IL-UWm" id="E1s-ps-2xX"/>
                         <outlet property="mainImageView" destination="D9M-ez-ezs" id="hqR-jo-VsS"/>
+                        <outlet property="randomPhotoButton" destination="qhM-yM-qO0" id="xWH-mX-y7n"/>
                         <outlet property="selectButton" destination="Fnb-oh-sq8" id="dTD-fu-MBD"/>
                         <outlet property="sendAIButton" destination="Qfg-nh-uco" id="n6I-hL-iP3"/>
                         <outlet property="speechButton" destination="3ph-nX-vtX" id="cbN-wS-SOH"/>
