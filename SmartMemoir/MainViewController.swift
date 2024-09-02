@@ -98,8 +98,82 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
         }
     }
 
+    @IBOutlet weak var autoMatchPhotoButton: UIButton!
+    @IBAction func autoMatchPhotoButtonTapped(_ sender: UIButton) {
+        let alertController = UIAlertController(title: "输入内容", message: "请输入要匹配的内容", preferredStyle: .alert)
+        alertController.addTextField { (textField) in
+            textField.placeholder = "输入内容"
+        }
+        let confirmAction = UIAlertAction(title: "确认", style: .default) { [weak self] (_) in
+            guard let textField = alertController.textFields?.first, let text = textField.text else { return }
+            self?.autoMatchPhotoWithLanguage(userInput: text)
+        }
+        let cancelAction = UIAlertAction(title: "取消", style: .cancel, handler: nil)
+        alertController.addAction(confirmAction)
+        alertController.addAction(cancelAction)
+        present(alertController, animated: true, completion: nil)
+        // autoMatchPhotoWithLanguage(userInput: ""))
+    }
     
+    // 根据用户输入，自动匹配照片
+    func autoMatchPhotoWithLanguage(userInput: String) {
+        var photoDetails: [(String, String)] = []
+        for (key, tags) in photoDatabase {
+            let nonPathTags = tags.filter { !$0.hasPrefix("路径:") }.joined(separator: ", ")
+            photoDetails.append((key, nonPathTags))
+        }
+        let content = "这是用户输入的文本：" + userInput + "。请根据这个文本，从以下照片信息中找到与文本最匹配的照片，并返回照片的文件名。（请你最终只返回一个文件名，不要返回任何其他文字）" + photoDetails.map { "照片文件名: \($0.0), 照片描述: \($0.1)" }.joined(separator: "\n")
+        print("[autoMatchPhotoWithLanguage]----------content:", content)
+        sentZhipuAIMessageByCustomStream(content: content)
+        
+        // 等待completeDataStreamStatus为2后，调用displayPhotoByAIResult
+        DispatchQueue.global().async {
+            while self.completeDataStreamStatus != 2 {
+                usleep(100000) // 每0.1秒检查一次
+            }
+            DispatchQueue.main.async {
+                self.displayPhotoByAIResult(aiResult: self.completeDataStream)
+            }
+        }
+    }
+
+    func displayPhotoByAIResult(aiResult: String) 
+    {
+        let photoFileName = aiResult
+        let photoURL = photoDatabase[photoFileName]?.first
+        if photoURL != nil && photoURL!.hasPrefix("路径:") {
+            let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
+            // let fileURL = documentsDirectory.appendingPathComponent(photoURL!.replacingOccurrences(of: "路径:", with: ""))
+
+            let fileURL = documentsDirectory.appendingPathComponent(aiResult)
+            do {
+                let imageData = try Data(contentsOf: fileURL)
+                let image = UIImage(data: imageData)!
+                mainImageView.image = image
+                print("已显示照片: \(photoFileName)")
+            } catch {
+                print("显示照片时出错: \(error)")
+            }
+        }
+        else {
+            print("没有匹配到照片")
+        }
+        completeDataStreamStatus = 0
+    }
     
+    func sentZhipuAIMessageByCustomStream(content: String) {
+        completeDataStream = ""
+        sendZhipuAiRequestStream(messages: [["role": "user", "content": content]]) { result in
+            switch result {
+            case .success(_):
+                print("智谱AI请求成功(流式传输): ")
+            case .failure(let error):
+                print("智谱AI请求错误(流式传输): \(error)")
+                // 在这里处理请求错误
+            }
+        }
+    }
+
     @IBAction func zhipuAIButtonTapped(_ sender: UIButton) {
         // sentZhipuAIMessageWithContent()
         sentZhipuAIMessageWithContentStream()
@@ -108,7 +182,6 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
     // 处理流式响应的函数
     func sentZhipuAIMessageWithContentStream() {
         var final_content = ""
-        loadPhotoDatabase()
         do {
             let photoDatabaseInfo = try JSONSerialization.data(withJSONObject: photoDatabase, options: [])
             
@@ -176,10 +249,12 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
 
         let session = URLSession(configuration: .default, delegate: self, delegateQueue: nil)
         let task = session.dataTask(with: request)
+        completeDataStreamStatus = 0
         task.resume()
     }
 
     var completeDataStream = ""
+    var completeDataStreamStatus = 0
         // URLSessionDataDelegate 方法
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
         if let string = String(data: data, encoding: .utf8) {
@@ -190,6 +265,7 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
                     if content == "[DONE]" {
                         // print("\n流式响应结束")
                         print("\n完整的数据流: \(completeDataStream)")
+                        completeDataStreamStatus = 2
                         // 在这里处理响应结束的逻辑
                     } else {
                         // 尝试解析 JSON 内容
@@ -204,6 +280,7 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
                                 // 在这里处理接收到的内容片段
                                 // 将内容片段拼接到完整的数据流中
                                 completeDataStream.append(text)
+                                completeDataStreamStatus = 1
                             }
                         } catch {
                             print("解析 JSON 时出错：\(error)")

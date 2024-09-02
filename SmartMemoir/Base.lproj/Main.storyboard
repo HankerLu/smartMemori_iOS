@@ -108,12 +108,22 @@
                                     <action selector="addTagToCurrentPhotoButtonTapped:" destination="WhH-ZP-D41" eventType="touchUpInside" id="A8v-MK-O37"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="hJC-BX-9Lp">
+                                <rect key="frame" x="159" y="179" width="78" height="35"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" title="Search"/>
+                                <connections>
+                                    <action selector="autoMatchPhotoButtonTapped:" destination="WhH-ZP-D41" eventType="touchUpInside" id="907-82-7ca"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="RQ6-yf-6jC"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                     </view>
                     <connections>
                         <outlet property="addTagToCurrentPhotoButton" destination="cHm-XY-i7h" id="ImM-R5-Rgd"/>
+                        <outlet property="autoMatchPhotoButton" destination="hJC-BX-9Lp" id="dj7-nz-y4G"/>
                         <outlet property="debugListButton" destination="rsX-IL-UWm" id="E1s-ps-2xX"/>
                         <outlet property="mainImageView" destination="D9M-ez-ezs" id="hqR-jo-VsS"/>
                         <outlet property="randomPhotoButton" destination="qhM-yM-qO0" id="xWH-mX-y7n"/>
