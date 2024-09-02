@@ -104,7 +104,19 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
     }
     // 发送智谱AI消息并获取回调
     func sentZhipuAIMessageWithContent() {
-        sendZhipuAiRequest(messages: [["role": "user", "content": "你好"]]) { result in
+        var final_content = ""
+        do {
+            let photoDatabaseInfo = try JSONSerialization.data(withJSONObject: photoDatabase, options: [])
+            
+            let photoDatabaseInfoString = String(data: photoDatabaseInfo, encoding: .utf8) ?? ""
+            print("----------photoDatabaseInfoString:", photoDatabaseInfoString)
+            final_content = "你好，这是一份关于照片文件及文件对应的信息描述的数据库文件：" + photoDatabaseInfoString + "。你能试着帮我解读每一张照片背后的信息吗？"
+        } catch {
+            print("转换JSON数据时出错: \(error)")
+            final_content = "你好"
+        }
+        
+        sendZhipuAiRequest(messages: [["role": "user", "content": final_content]]) { result in
             switch result {
             case .success(let content):
                 print("智谱AI返回内容: \(content)")
