@@ -173,6 +173,7 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
         task.resume()
     }
 
+    var completeDataStream = ""
         // URLSessionDataDelegate 方法
     func urlSession(_ session: URLSession, dataTask: URLSessionDataTask, didReceive data: Data) {
         if let string = String(data: data, encoding: .utf8) {
@@ -181,7 +182,8 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
                 if line.hasPrefix("data: ") {
                     let content = String(line.dropFirst(6))
                     if content == "[DONE]" {
-                        print("\n流式响应结束")
+                        // print("\n流式响应结束")
+                        print("\n完整的数据流: \(completeDataStream)")
                         // 在这里处理响应结束的逻辑
                     } else {
                         // 尝试解析 JSON 内容
@@ -194,6 +196,8 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
                                let text = delta["content"] {
                                 print(text, terminator: "")
                                 // 在这里处理接收到的内容片段
+                                // 将内容片段拼接到完整的数据流中
+                                completeDataStream.append(text)
                             }
                         } catch {
                             print("解析 JSON 时出错：\(error)")
