@@ -100,8 +100,137 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
     
     
     @IBAction func zhipuAIButtonTapped(_ sender: UIButton) {
-        sentZhipuAIMessageWithContent()
+        // sentZhipuAIMessageWithContent()
+        sentZhipuAIMessageWithContentStream()
     }
+
+    // 处理流式响应的函数
+    func sentZhipuAIMessageWithContentStream() {
+        var final_content = ""
+        do {
+            let photoDatabaseInfo = try JSONSerialization.data(withJSONObject: photoDatabase, options: [])
+            
+            let photoDatabaseInfoString = String(data: photoDatabaseInfo, encoding: .utf8) ?? ""
+            print("----------photoDatabaseInfoString:", photoDatabaseInfoString)
+            final_content = "你好，这是一份关于照片文件及文件对应的信息描述的数据库文件：" + photoDatabaseInfoString + "。你能试着帮我解读每一张照片背后的信息吗？"
+        } catch {
+            print("转换JSON数据时出错: \(error)")
+            final_content = "你好"
+        }
+        
+        sendZhipuAiRequestStream(messages: [["role": "user", "content": final_content]]) { result in
+            switch result {
+            case .success(let content):
+                print("智谱AI返回内容(流式传输): \(content)")
+                // 处理流式响应
+                if let data = content.data(using: .utf8) {
+                    self.handleStreamResponse(data: data)
+                }
+            case .failure(let error):
+                print("智谱AI请求错误(流式传输): \(error)")
+                // 在这里处理请求错误
+            }
+        }
+    }
+    
+    // 处理流式响应的函数
+    func handleStreamResponse(data: Data) {
+        // 将数据转换为字符串
+        guard let string = String(data: data, encoding: .utf8) else {
+            print("无法将数据转换为字符串")
+            return
+        }
+        
+        // 按行分割响应
+        let lines = string.components(separatedBy: "\n")
+        
+        for line in lines {
+            if line.hasPrefix("data: ") {
+                let content = String(line.dropFirst(6))
+                
+                if content == "[DONE]" {
+                    print("流式响应结束")
+                    // 在这里处理响应结束的逻辑
+                } else {
+                    // 尝试解析 JSON 内容
+                    do {
+                        if let jsonData = content.data(using: .utf8),
+                           let json = try JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any],
+                           let choices = json["choices"] as? [[String: Any]],
+                           let firstChoice = choices.first,
+                           let delta = firstChoice["delta"] as? [String: String],
+                           let text = delta["content"] {
+                            print(text, terminator: "")
+                            // print("接收到的内容片段：\(text)")
+                            // 在这里处理接收到的内容片段
+                        }
+                    } catch {
+                        print("解析 JSON 时出错：\(error)")
+                    }
+                }
+            }
+        }
+    }
+
+    // 发送请求到智谱AI的函数，适应流式块传输接收
+    func sendZhipuAiRequestStream(messages: [[String: String]], completion: @escaping (Result<String, Error>) -> Void) {
+        // 定义API的URL字符串
+        let urlString = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
+        // 尝试创建URL对象，如果失败则返回错误
+        guard let url = URL(string: urlString) else {
+            completion(.failure(NSError(domain: "无效的URL", code: 0, userInfo: nil)))
+            return
+        }
+        
+        // 创建URLRequest对象
+        var request = URLRequest(url: url)
+        // 设置HTTP方法为POST
+        request.httpMethod = "POST"
+        // 设置请求头，指定内容类型为JSON
+        request.addValue("application/json", forHTTPHeaderField: "Content-Type")
+        
+        // 定义请求参数
+        let parameters: [String: Any] = [
+            "model": "glm-4",
+            "messages": messages,
+            "stream": true,
+            "temperature": 0.95,
+            "top_p": 0.7
+        ]
+
+        do {
+            request.allHTTPHeaderFields = [
+            "Authorization": "5970c032a7158d0f72d69890e806c912.KOAJqVp6cvhp7LS3",
+            "Content-Type": "application/json"
+            ]
+            // 尝试将参数转换为JSON数据
+            request.httpBody = try JSONSerialization.data(withJSONObject: parameters)
+        } catch {
+            // 如果转换失败，返回错误
+            completion(.failure(error))
+            return
+        }
+        
+        // 创建并执行网络请求任务
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                completion(.failure(error))
+                return
+            }
+            guard let data = data else {
+                completion(.failure(NSError(domain: "没有数据返回", code: 0, userInfo: nil)))
+                return
+            }
+            print("流式传输")
+            // print("原始返回的报文内容: \(String(data: data, encoding: .utf8) ?? "无法解析")")
+            completion(.success(String(data: data, encoding: .utf8) ?? "无法解析"))
+        }
+        
+        // 开始网络请求任务
+        print("开始网络请求任务")
+        task.resume()
+    }
+
     // 发送智谱AI消息并获取回调
     func sentZhipuAIMessageWithContent() {
         var final_content = ""
@@ -180,28 +309,32 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
                 completion(.failure(NSError(domain: "没有数据返回", code: 0, userInfo: nil)))
                 return
             }
-            
-            do {
+
+            print("非流式传输")
+            do {               
                 // print("原始返回的报文内容: \(String(data: data, encoding: .utf8) ?? "无法解析")")
                 // 尝试解析返回的JSON数据
                 if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-                   let choices = json["choices"] as? [[String: Any]],
-                   let firstChoice = choices.first,
-                   let message = firstChoice["message"] as? [String: Any],
-                   let content = message["content"] as? String {
+                let choices = json["choices"] as? [[String: Any]],
+                let firstChoice = choices.first,
+                let message = firstChoice["message"] as? [String: Any],
+                let content = message["content"] as? String {
                     // 如果成功解析，返回内容
                     // print("成功解析返回内容: \(content)") // 增加打印返回内容
                     print("成功解析返回内容")
                     completion(.success(content))
                 } else {
                     // 如果解析失败，返回错误
+                    print("返回内容解析失败")   
                     completion(.failure(NSError(domain: "无法解析响应", code: 0, userInfo: nil)))
                 }
             } catch {
                 // 如果解析过程中出现错误，返回错误
+                print("返回内容解析错误")
                 completion(.failure(error))
             }
         }
+        
         
         // 开始网络请求任务
         task.resume()
@@ -398,4 +531,3 @@ class LongTermIncentiveManager {
         }
     }
 }
-
