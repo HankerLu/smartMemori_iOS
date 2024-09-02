@@ -339,6 +339,7 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
                         let tags: [String] = ["路径: \(photoURL)", "保存时间: \(currentTime)"] // 保存照片地址和当前时间
                         addPhoto(withName: fileName, tags: tags)
                         savePhotoDatabase()
+                        currentPhotoFileName = fileName
                         // print("选择的图片已保存内部数据库: \(fileName)")
 
                     } catch {
@@ -376,6 +377,7 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
         }
     }
 
+    var currentPhotoFileName: String?
     @IBAction func randomPhotoButtonTapped(_ sender: UIButton) {
         loadRandomPhoto()
     }
@@ -392,6 +394,7 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
         print("随机索引: \(randomIndex), 随机照片数量: \(photoDatabase.count)")
         
         let randomPhotoKey = Array(photoDatabase.keys)[randomIndex]
+        currentPhotoFileName = randomPhotoKey
         
         // 获取照片的URL
         let documentsDirectory = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first!
@@ -471,6 +474,23 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
                 }
             } catch {
                 print("加载照片数据库时出错: \(error)")
+            }
+        }
+    }
+
+    @IBOutlet weak var addTagToCurrentPhotoButton: UIButton!
+    @IBAction func addTagToCurrentPhotoButtonTapped(_ sender: UIButton) {
+        addTagToCurrentPhoto(tag: "照片内容: 风景")
+    }
+
+    func addTagToCurrentPhoto(tag: String) {
+        if let currentPhotoFileName = currentPhotoFileName {
+            if var tags = photoDatabase[currentPhotoFileName] {
+                tags.append(tag)
+                photoDatabase[currentPhotoFileName] = tags
+                print("已为照片 \(currentPhotoFileName) 添加标签: \(tag)")
+            } else {
+                print("照片 \(currentPhotoFileName) 的标签添加失败")
             }
         }
     }
