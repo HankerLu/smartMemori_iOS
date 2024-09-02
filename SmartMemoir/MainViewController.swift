@@ -118,7 +118,7 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
             // print("----------photoDatabaseInfoString:", photoDatabaseInfoString)
             let photoDatabaseInfoString = extractPhotoPathsFromCurrentImageViewPhoto()
             print("----------photoDatabaseInfoString:", photoDatabaseInfoString)
-            final_content = "你好，这是一份关于照片文件及文件对应的信息描述的数据库文件：" + photoDatabaseInfoString + "。你能试着帮我简单解读和描述这些信息吗？"
+            final_content = "你好，这是关于一张照片的信息描述的数据库文件：" + photoDatabaseInfoString + "。\n你能试着帮我简单解读和描述这些信息吗？（注意：请你用日常口语聊天的方式来描述，不要用专业术语）"
         } catch {
             print("转换JSON数据时出错: \(error)")
             final_content = "你好"
@@ -485,7 +485,19 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
 
     @IBOutlet weak var addTagToCurrentPhotoButton: UIButton!
     @IBAction func addTagToCurrentPhotoButtonTapped(_ sender: UIButton) {
-        addTagToCurrentPhoto(tag: "照片内容: 风景")
+        let alertController = UIAlertController(title: "添加标签", message: "请输入标签内容", preferredStyle: .alert)
+        alertController.addTextField { (textField) in
+            textField.placeholder = "标签内容"
+        }
+        let confirmAction = UIAlertAction(title: "确认", style: .default) { [weak self] (_) in
+            guard let textField = alertController.textFields?.first, let text = textField.text else { return }
+            self?.addTagToCurrentPhoto(tag: text)
+        }
+        let cancelAction = UIAlertAction(title: "取消", style: .cancel, handler: nil)
+        alertController.addAction(confirmAction)
+        alertController.addAction(cancelAction)
+        present(alertController, animated: true, completion: nil)
+        // addTagToCurrentPhoto(tag: text)
     }
 
     func addTagToCurrentPhoto(tag: String) {
