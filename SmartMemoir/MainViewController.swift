@@ -16,6 +16,7 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
     @IBOutlet weak var switchButton: UIButton!
     @IBOutlet weak var debugListButton: UIButton!
     @IBOutlet weak var speechButton: UIButton!
+    @IBOutlet weak var sendAIButton: UIButton!
     
     @IBAction func selectButtonTapped(_ sender: UIButton) {
         let imagePicker = UIImagePickerController()
@@ -97,58 +98,99 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
     }
 
     
+    
+    @IBAction func zhipuAIButtonTapped(_ sender: UIButton) {
+        sentZhipuAIMessageWithContent()
+    }
+    // 发送智谱AI消息并获取回调
+    func sentZhipuAIMessageWithContent() {
+        sendZhipuAiRequest(messages: [["role": "user", "content": "你好"]]) { result in
+            switch result {
+            case .success(let content):
+                print("智谱AI返回内容: \(content)")
+                // 在这里处理成功返回的内容
+            case .failure(let error):
+                print("智谱AI请求错误: \(error)")
+                // 在这里处理请求错误
+            }
+        }
+    }
+
+    // 发送请求到智谱AI的函数
     func sendZhipuAiRequest(messages: [[String: String]], completion: @escaping (Result<String, Error>) -> Void) {
+        // 定义API的URL字符串
         let urlString = "https://open.bigmodel.cn/api/paas/v4/chat/completions"
+        // 尝试创建URL对象，如果失败则返回错误
         guard let url = URL(string: urlString) else {
             completion(.failure(NSError(domain: "无效的URL", code: 0, userInfo: nil)))
             return
         }
         
+        // 创建URLRequest对象
         var request = URLRequest(url: url)
+        // 设置HTTP方法为POST
         request.httpMethod = "POST"
+        // 设置请求头，指定内容类型为JSON
         request.addValue("application/json", forHTTPHeaderField: "Content-Type")
         
+        // 定义请求参数
         let parameters: [String: Any] = [
-            "model": "your_model_code_here",
+            "model": "glm-4",
             "messages": messages,
             "stream": false,
             "temperature": 0.95,
             "top_p": 0.7
         ]
-        
+
         do {
+            request.allHTTPHeaderFields = [
+            "Authorization": "5970c032a7158d0f72d69890e806c912.KOAJqVp6cvhp7LS3",
+            "Content-Type": "application/json"
+            ]
+            // 尝试将参数转换为JSON数据
             request.httpBody = try JSONSerialization.data(withJSONObject: parameters)
         } catch {
+            // 如果转换失败，返回错误
             completion(.failure(error))
             return
         }
         
+        // 创建并执行网络请求任务
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            // 如果有错误，返回错误
             if let error = error {
                 completion(.failure(error))
                 return
             }
             
+            // 确保返回的数据不为空
             guard let data = data else {
                 completion(.failure(NSError(domain: "没有数据返回", code: 0, userInfo: nil)))
                 return
             }
             
             do {
+                // print("原始返回的报文内容: \(String(data: data, encoding: .utf8) ?? "无法解析")")
+                // 尝试解析返回的JSON数据
                 if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
                    let choices = json["choices"] as? [[String: Any]],
                    let firstChoice = choices.first,
                    let message = firstChoice["message"] as? [String: Any],
                    let content = message["content"] as? String {
+                    // 如果成功解析，返回内容
+                    print("成功解析返回内容: \(content)") // 增加打印返回内容
                     completion(.success(content))
                 } else {
+                    // 如果解析失败，返回错误
                     completion(.failure(NSError(domain: "无法解析响应", code: 0, userInfo: nil)))
                 }
             } catch {
+                // 如果解析过程中出现错误，返回错误
                 completion(.failure(error))
             }
         }
         
+        // 开始网络请求任务
         task.resume()
     }
     

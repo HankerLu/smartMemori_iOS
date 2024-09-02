@@ -81,6 +81,15 @@
                                     <action selector="speechButtonTapped:" destination="WhH-ZP-D41" eventType="touchUpInside" id="tFD-uG-ydm"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Qfg-nh-uco">
+                                <rect key="frame" x="160" y="607" width="77" height="35"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" title="AI msg"/>
+                                <connections>
+                                    <action selector="zhipuAIButtonTapped:" destination="WhH-ZP-D41" eventType="touchUpInside" id="6LA-hy-OYv"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="RQ6-yf-6jC"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -89,6 +98,7 @@
                         <outlet property="debugListButton" destination="rsX-IL-UWm" id="E1s-ps-2xX"/>
                         <outlet property="mainImageView" destination="D9M-ez-ezs" id="hqR-jo-VsS"/>
                         <outlet property="selectButton" destination="Fnb-oh-sq8" id="dTD-fu-MBD"/>
+                        <outlet property="sendAIButton" destination="Qfg-nh-uco" id="n6I-hL-iP3"/>
                         <outlet property="speechButton" destination="3ph-nX-vtX" id="cbN-wS-SOH"/>
                         <outlet property="switchButton" destination="AZh-f4-E4o" id="rb8-mT-7MU"/>
                     </connections>
