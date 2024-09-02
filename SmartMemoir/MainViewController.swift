@@ -178,7 +178,8 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
                    let message = firstChoice["message"] as? [String: Any],
                    let content = message["content"] as? String {
                     // 如果成功解析，返回内容
-                    print("成功解析返回内容: \(content)") // 增加打印返回内容
+                    // print("成功解析返回内容: \(content)") // 增加打印返回内容
+                    print("成功解析返回内容")
                     completion(.success(content))
                 } else {
                     // 如果解析失败，返回错误
