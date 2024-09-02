@@ -108,12 +108,17 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
     // 处理流式响应的函数
     func sentZhipuAIMessageWithContentStream() {
         var final_content = ""
+        loadPhotoDatabase()
         do {
             let photoDatabaseInfo = try JSONSerialization.data(withJSONObject: photoDatabase, options: [])
             
-            let photoDatabaseInfoString = String(data: photoDatabaseInfo, encoding: .utf8) ?? ""
+            // let photoDatabaseInfoString = String(data: photoDatabaseInfo, encoding: .utf8) ?? ""
+            // print("----------photoDatabaseInfoString:", photoDatabaseInfoString)
+            // let photoDatabaseInfoString = extractTagsFromPhotoDatabase()
+            // print("----------photoDatabaseInfoString:", photoDatabaseInfoString)
+            let photoDatabaseInfoString = extractPhotoPathsFromCurrentImageViewPhoto()
             print("----------photoDatabaseInfoString:", photoDatabaseInfoString)
-            final_content = "你好，这是一份关于照片文件及文件对应的信息描述的数据库文件：" + photoDatabaseInfoString + "。你能试着帮我解读每一张照片背后的信息吗？"
+            final_content = "你好，这是一份关于照片文件及文件对应的信息描述的数据库文件：" + photoDatabaseInfoString + "。你能试着帮我简单解读和描述这些信息吗？"
         } catch {
             print("转换JSON数据时出错: \(error)")
             final_content = "你好"
@@ -494,6 +499,32 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
                 print("照片 \(currentPhotoFileName) 的标签添加失败")
             }
         }
+    }
+
+    func extractTagsFromPhotoDatabase() -> String {
+        var allTags: [String] = []
+        for (_, tags) in photoDatabase {
+            for tag in tags {
+                if !tag.hasPrefix("路径:") {
+                    allTags.append(tag)
+                }
+            }
+        }
+        return allTags.joined(separator: ", ")
+    }
+
+    func extractPhotoPathsFromCurrentImageViewPhoto  () -> String {
+        var allTags: [String] = []
+        if let currentPhotoFileName = currentPhotoFileName {
+            if let tags = photoDatabase[currentPhotoFileName] {
+                for tag in tags {
+                    if !tag.hasPrefix("路径:") {
+                        allTags.append(tag)
+                    }
+                }
+            }
+        }
+        return allTags.joined(separator: ", ")
     }
 
     
