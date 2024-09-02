@@ -120,56 +120,11 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
         
         sendZhipuAiRequestStream(messages: [["role": "user", "content": final_content]]) { result in
             switch result {
-            case .success(let content):
-                // print("智谱AI返回内容(流式传输): \(content)")
-                // 处理流式响应
-                if let data = content.data(using: .utf8) {
-                    self.handleStreamResponse(data: data)
-                }
+            case .success(_):
+                print("智谱AI请求成功(流式传输): ")
             case .failure(let error):
                 print("智谱AI请求错误(流式传输): \(error)")
                 // 在这里处理请求错误
-            }
-        }
-    }
-    
-    // 处理流式响应的函数
-    func handleStreamResponse(data: Data) {
-        print("处理流式响应")
-        
-        // 将数据转换为字符串
-        guard let string = String(data: data, encoding: .utf8) else {
-            print("无法将数据转换为字符串")
-            return
-        }
-        
-        // 按行分割响应
-        let lines = string.components(separatedBy: "\n")
-        
-        for line in lines {
-            if line.hasPrefix("data: ") {
-                let content = String(line.dropFirst(6))
-                
-                if content == "[DONE]" {
-                    print("流式响应结束")
-                    // 在这里处理响应结束的逻辑
-                } else {
-                    // 尝试解析 JSON 内容
-                    do {
-                        if let jsonData = content.data(using: .utf8),
-                           let json = try JSONSerialization.jsonObject(with: jsonData, options: []) as? [String: Any],
-                           let choices = json["choices"] as? [[String: Any]],
-                           let firstChoice = choices.first,
-                           let delta = firstChoice["delta"] as? [String: String],
-                           let text = delta["content"] {
-                            print(text, terminator: "")
-                            // print("接收到的内容片段：\(text)")
-                            // 在这里处理接收到的内容片段
-                        }
-                    } catch {
-                        print("解析 JSON 时出错：\(error)")
-                    }
-                }
             }
         }
     }
@@ -216,24 +171,6 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
         let session = URLSession(configuration: .default, delegate: self, delegateQueue: nil)
         let task = session.dataTask(with: request)
         task.resume()
-        // // 创建并执行网络请求任务
-        // let task = URLSession.shared.dataTask(with: request) { data, response, error in
-        //     print("流式传输")
-        //     if let error = error {
-        //         completion(.failure(error))
-        //         return
-        //     }
-        //     guard let data = data else {
-        //         completion(.failure(NSError(domain: "没有数据返回", code: 0, userInfo: nil)))
-        //         return
-        //     }
-        //     // print("原始返回的报文内容: \(String(data: data, encoding: .utf8) ?? "无法解析")")
-        //     completion(.success(String(data: data, encoding: .utf8) ?? "无法解析"))
-        // }
-        
-        // // 开始网络请求任务
-        // print("开始网络请求任务")
-        // task.resume()
     }
 
         // URLSessionDataDelegate 方法
