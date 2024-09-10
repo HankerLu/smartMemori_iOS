@@ -1,0 +1,47 @@
+# Xcode
+.DS_Store
+*/build/*
+*.pbxuser
+!default.pbxuser
+*.mode1v3
+!default.mode1v3
+*.mode2v3
+!default.mode2v3
+*.perspectivev3
+!default.perspectivev3
+xcuserdata
+profile
+*.moved-aside
+DerivedData
+.idea/
+*.hmap
+*.xccheckout
+*.xcworkspace
+!default.xcworkspace
+
+# CocoaPods
+Pods/
+Podfile.lock
+
+# Carthage
+Carthage/Build
+
+# Swift Package Manager
+.build/
+
+# 其他
+*.swp
+*.lock
+*~.nib
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# 自动生成的文件
+*.generated.swift
+
+# 敏感信息
+*.pem
+*.cer
+*.p12
+*.mobileprovision
