@@ -19,6 +19,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		3680473A2C928F910057B687 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		36DDD8442C7F0A21000AB622 /* SmartMemoir.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SmartMemoir.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		36DDD8472C7F0A21000AB622 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		36DDD8492C7F0A21000AB622 /* GameScene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = GameScene.sks; sourceTree = "<group>"; };
@@ -61,6 +62,7 @@
 		36DDD8462C7F0A21000AB622 /* SmartMemoir */ = {
 			isa = PBXGroup;
 			children = (
+				3680473A2C928F910057B687 /* Info.plist */,
 				36DDD8472C7F0A21000AB622 /* AppDelegate.swift */,
 				36DDD8492C7F0A21000AB622 /* GameScene.sks */,
 				36DDD84B2C7F0A21000AB622 /* Actions.sks */,
@@ -304,6 +306,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = G4M3PKJ6YK;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SmartMemoir/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;
@@ -332,6 +335,7 @@
 				CURRENT_PROJECT_VERSION = 1;
 				DEVELOPMENT_TEAM = G4M3PKJ6YK;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = SmartMemoir/Info.plist;
 				INFOPLIST_KEY_UIApplicationSupportsIndirectInputEvents = YES;
 				INFOPLIST_KEY_UILaunchStoryboardName = LaunchScreen;
 				INFOPLIST_KEY_UIMainStoryboardFile = Main;

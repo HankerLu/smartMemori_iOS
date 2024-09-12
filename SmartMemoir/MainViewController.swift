@@ -31,6 +31,63 @@ class RemotePhotoService {
         
         URLSession.shared.dataTask(with: url) { data, response, error in
             if let error = error {
+                DispatchQueue.main.async {
+                    completion(nil, error)
+                }
+                return
+            }
+            print("下载照片成功")
+            if let data = data {
+                print("返回的完整数据: \(String(data: data, encoding: .utf8) ?? "无法解码数据")")
+            } else {
+                print("返回的数据为空")
+            }
+                
+            guard let data = data else {
+                DispatchQueue.main.async {
+                    completion(nil, NSError(domain: "无效的图片数据", code: 0, userInfo: nil))
+                }
+                return
+            }
+            
+            // 将返回的数据解析为字符串
+            do {
+                if let jsonObject = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                   let responseData = jsonObject["data"] as? [String: Any],
+                   let base64String = responseData["imageData"] as? String,
+                   let imageData = Data(base64Encoded: base64String),
+                   let image = UIImage(data: imageData) {
+                    DispatchQueue.main.async {
+                        completion(image, nil)
+                    }
+                } else {
+                    print("无法解析JSON数据或提取图像数据")
+                    DispatchQueue.main.async {
+                        completion(nil, NSError(domain: "数据解析失败", code: 0, userInfo: nil))
+                    }
+                }
+            } catch {
+                print("JSON解析错误: \(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    completion(nil, error)
+                }
+            }
+        }.resume()
+    }
+
+    /// 获取指定用户的照片
+    /// - Parameters:
+    ///   - userID: 用户ID
+    ///   - completion: 完成回调，返回下载的图片或错误
+    func getUserPhoto(userID: String, completion: @escaping (UIImage?, Error?) -> Void) {
+        let urlString = "\(baseURL)/photograph/image/user/\(userID)"
+        guard let url = URL(string: urlString) else {
+            completion(nil, NSError(domain: "无效的URL", code: 0, userInfo: nil))
+            return
+        }
+        
+        URLSession.shared.dataTask(with: url) { data, response, error in
+            if let error = error {
                 completion(nil, error)
                 return
             }
