@@ -726,8 +726,11 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
         }
     }
 
+
+    @IBOutlet weak var downloadPhotoButton: UIButton!
     @IBAction func downloadPhotoFromRemoteServer(_ sender: UIButton) {
-        guard let photoID = currentPhotoFileName else {
+        let photoID = "1a18c4d86d29bbd489ece231fb79cbec"
+        guard !photoID.isEmpty else {
             print("没有照片ID可下载")
             return
         }
