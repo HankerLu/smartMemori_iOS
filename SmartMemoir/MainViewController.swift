@@ -74,61 +74,43 @@ class RemotePhotoService {
             }
         }.resume()
     }
-
-    /// 获取指定用户的照片
-    /// - Parameters:
-    ///   - userID: 用户ID
-    ///   - completion: 完成回调，返回下载的图片或错误
-    func getUserPhoto(userID: String, completion: @escaping (UIImage?, Error?) -> Void) {
-        let urlString = "\(baseURL)/photograph/image/user/\(userID)"
-        guard let url = URL(string: urlString) else {
-            completion(nil, NSError(domain: "无效的URL", code: 0, userInfo: nil))
-            return
-        }
-        
-        URLSession.shared.dataTask(with: url) { data, response, error in
-            if let error = error {
-                completion(nil, error)
-                return
-            }
-            
-            guard let data = data, let image = UIImage(data: data) else {
-                completion(nil, NSError(domain: "无效的图片数据", code: 0, userInfo: nil))
-                return
-            }
-            
-            completion(image, nil)
-        }.resume()
-    }
     
     /// 上传照片到远程服务器
     /// - Parameters:
     ///   - image: 要上传的图片
     ///   - completion: 完成回调，返回上传成功的照片ID或错误
     func uploadPhoto(_ image: UIImage, completion: @escaping (String?, Error?) -> Void) {
-        guard let url = URL(string: baseURL + "/upload") else {
+        guard let url = URL(string: "\(baseURL)/photograph/image/upload?userId=123456") else {
             completion(nil, NSError(domain: "无效的上传URL", code: 0, userInfo: nil))
             return
         }
         
-        guard let imageData = image.jpegData(compressionQuality: 0.8) else {
+        guard let imageData = image.pngData() else {
             completion(nil, NSError(domain: "图片转换失败", code: 0, userInfo: nil))
             return
         }
+        print("imageData: \(imageData)")
+        
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
-        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        let base64String = imageData.base64EncodedString()
-        let jsonBody: [String: Any] = ["imageData": base64String]
+        let boundary = UUID().uuidString
+        request.setValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
         
-        do {
-            request.httpBody = try JSONSerialization.data(withJSONObject: jsonBody)
-        } catch {
-            completion(nil, NSError(domain: "JSON序列化失败", code: 0, userInfo: nil))
-            return
-        }
+        var body = Data()
+        // 添加文件数据
+        body.append("--\(boundary)\r\n".data(using: .utf8)!)
+        body.append("Content-Disposition: form-data; name=\"file\"; filename=\"image.jpg\"\r\n".data(using: .utf8)!)
+        body.append("Content-Type: image/jpeg\r\n\r\n".data(using: .utf8)!)
+        body.append(imageData)
+        body.append("\r\n".data(using: .utf8)!)
+        
+        // 结束分隔符
+        body.append("--\(boundary)--\r\n".data(using: .utf8)!)
+        
+        
+        request.httpBody = body
         
         URLSession.shared.dataTask(with: request) { data, response, error in
             if let error = error {
@@ -138,13 +120,6 @@ class RemotePhotoService {
                 return
             }
             
-            print("上传照片成功")
-            if let data = data {
-                print("返回的完整数据: \(String(data: data, encoding: .utf8) ?? "无法解码数据")")
-            } else {
-                print("返回的数据为空")
-            }
-            
             guard let data = data else {
                 DispatchQueue.main.async {
                     completion(nil, NSError(domain: "无效的服务器响应", code: 0, userInfo: nil))
@@ -152,12 +127,19 @@ class RemotePhotoService {
                 return
             }
             
+            // 打印原始报文
+            if let rawResponse = String(data: data, encoding: .utf8) {
+                print("原始报文: \(rawResponse)")
+            }
+            
             do {
                 if let jsonObject = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                   let success = jsonObject["success"] as? Bool,
+                   success,
                    let responseData = jsonObject["data"] as? [String: Any],
-                   let photoID = responseData["id"] as? String {
+                   let imageId = responseData["imageId"] as? String {
                     DispatchQueue.main.async {
-                        completion(photoID, nil)
+                        completion(imageId, nil)
                     }
                 } else {
                     print("无法解析JSON数据或提取图片ID")
@@ -821,7 +803,7 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
 
     @IBOutlet weak var downloadPhotoButton: UIButton!
     @IBAction func downloadPhotoFromRemoteServer(_ sender: UIButton) {
-        let photoID = "1a18c4d86d29bbd489ece231fb79cbec"
+        let photoID = "d06ef4e5900ed514778748f33ee49869"
         guard !photoID.isEmpty else {
             print("没有照片ID可下载")
             return
