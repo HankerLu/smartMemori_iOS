@@ -19,6 +19,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0081FD6DD4D2617EBE84D697 /* Pods-SmartMemoir.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SmartMemoir.debug.xcconfig"; path = "Target Support Files/Pods-SmartMemoir/Pods-SmartMemoir.debug.xcconfig"; sourceTree = "<group>"; };
 		3680473A2C928F910057B687 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		36DDD8442C7F0A21000AB622 /* SmartMemoir.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SmartMemoir.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		36DDD8472C7F0A21000AB622 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -30,6 +31,8 @@
 		36DDD8542C7F0A22000AB622 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		36DDD8572C7F0A22000AB622 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		36DDD85E2C7F1055000AB622 /* MainViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MainViewController.swift; sourceTree = "<group>"; };
+		D1747ECC51FAE15078C1BB5B /* Pods_SmartMemoir.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_SmartMemoir.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		D9A1EF819487C62283B81869 /* Pods-SmartMemoir.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SmartMemoir.release.xcconfig"; path = "Target Support Files/Pods-SmartMemoir/Pods-SmartMemoir.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -43,11 +46,22 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		15B653E2EB787A650560ED5F /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				0081FD6DD4D2617EBE84D697 /* Pods-SmartMemoir.debug.xcconfig */,
+				D9A1EF819487C62283B81869 /* Pods-SmartMemoir.release.xcconfig */,
+			);
+			path = Pods;
+			sourceTree = "<group>";
+		};
 		36DDD83B2C7F0A21000AB622 = {
 			isa = PBXGroup;
 			children = (
 				36DDD8462C7F0A21000AB622 /* SmartMemoir */,
 				36DDD8452C7F0A21000AB622 /* Products */,
+				15B653E2EB787A650560ED5F /* Pods */,
+				7AA2D71FF34EAD8AE3452130 /* Frameworks */,
 			);
 			sourceTree = "<group>";
 		};
@@ -76,6 +90,14 @@
 			path = SmartMemoir;
 			sourceTree = "<group>";
 		};
+		7AA2D71FF34EAD8AE3452130 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				D1747ECC51FAE15078C1BB5B /* Pods_SmartMemoir.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
@@ -83,6 +105,7 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 36DDD85B2C7F0A22000AB622 /* Build configuration list for PBXNativeTarget "SmartMemoir" */;
 			buildPhases = (
+				9DE814459D9F8CDBAD4AB186 /* [CP] Check Pods Manifest.lock */,
 				36DDD8402C7F0A21000AB622 /* Sources */,
 				36DDD8412C7F0A21000AB622 /* Frameworks */,
 				36DDD8422C7F0A21000AB622 /* Resources */,
@@ -143,6 +166,31 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		9DE814459D9F8CDBAD4AB186 /* [CP] Check Pods Manifest.lock */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputFileListPaths = (
+			);
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
+			outputPaths = (
+				"$(DERIVED_FILE_DIR)/Pods-SmartMemoir-checkManifestLockResult.txt",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
+			showEnvVarsInLog = 0;
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		36DDD8402C7F0A21000AB622 /* Sources */ = {
@@ -299,6 +347,7 @@
 		};
 		36DDD85C2C7F0A22000AB622 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 0081FD6DD4D2617EBE84D697 /* Pods-SmartMemoir.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
@@ -328,6 +377,7 @@
 		};
 		36DDD85D2C7F0A22000AB622 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = D9A1EF819487C62283B81869 /* Pods-SmartMemoir.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;

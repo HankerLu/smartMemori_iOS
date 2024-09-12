@@ -7,7 +7,7 @@
 
 import UIKit
 import Speech
-
+//import SwiftSH
 class RemotePhotoService {
     private let baseURL = "http://119.45.18.3:789"
     private let imagePath = "/photograph/image/"
@@ -905,6 +905,7 @@ class PhotoSSHTransfer {
         return successCount
     }
     
+
     /// 检查远程系统的可用存储空间
     /// - Returns: 可用空间大小（字节）
     func checkRemoteStorageSpace() -> Int64? {
@@ -921,6 +922,41 @@ class PhotoSSHTransfer {
         print("模拟创建远程目录: \(path)")
         return true
     }
+
+    // /// 使用SSH直接访问指定IP地址
+    // /// - Returns: 是否连接成功
+    // func connectToSpecificIP() -> Bool {
+    //     let targetIP = "192.168.200.173"
+    //     let defaultPort = 22
+    //     let defaultUsername = "user" // 请替换为实际用户名
+        
+    //     print("尝试通过SSH连接到 \(targetIP)")
+        
+    //     do {
+    //         // 创建SSH客户端
+    //         let sshClient = SSHClient()
+            
+    //         // 连接到目标IP
+    //         try sshClient.connect(host: targetIP, port: defaultPort)
+            
+    //         // 进行身份验证
+    //         try sshClient.authenticate(username: defaultUsername, method: .password("your_password"))
+            
+    //         print("成功连接到 \(targetIP)")
+            
+    //         // 执行简单的命令以验证连接
+    //         let result = try sshClient.execute("echo 'Hello from \(targetIP)'")
+    //         print("命令执行结果: \(result)")
+            
+    //         // 关闭连接
+    //         sshClient.disconnect()
+            
+    //         return true
+    //     } catch {
+    //         print("连接到 \(targetIP) 失败: \(error.localizedDescription)")
+    //         return false
+    //     }
+    // }
     
     /// 关闭SSH会话
     func closeConnection() {
