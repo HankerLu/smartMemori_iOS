@@ -118,25 +118,60 @@ class RemotePhotoService {
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
-        request.setValue("image/jpeg", forHTTPHeaderField: "Content-Type")
+        request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         
-        let task = URLSession.shared.uploadTask(with: request, from: imageData) { data, response, error in
-            if let error = error {
-                completion(nil, error)
-                return
-            }
-            
-            guard let data = data,
-                  let responseString = String(data: data, encoding: .utf8),
-                  let photoID = responseString.components(separatedBy: "/").last else {
-                completion(nil, NSError(domain: "无效的服务器响应", code: 0, userInfo: nil))
-                return
-            }
-            
-            completion(photoID, nil)
+        let base64String = imageData.base64EncodedString()
+        let jsonBody: [String: Any] = ["imageData": base64String]
+        
+        do {
+            request.httpBody = try JSONSerialization.data(withJSONObject: jsonBody)
+        } catch {
+            completion(nil, NSError(domain: "JSON序列化失败", code: 0, userInfo: nil))
+            return
         }
         
-        task.resume()
+        URLSession.shared.dataTask(with: request) { data, response, error in
+            if let error = error {
+                DispatchQueue.main.async {
+                    completion(nil, error)
+                }
+                return
+            }
+            
+            print("上传照片成功")
+            if let data = data {
+                print("返回的完整数据: \(String(data: data, encoding: .utf8) ?? "无法解码数据")")
+            } else {
+                print("返回的数据为空")
+            }
+            
+            guard let data = data else {
+                DispatchQueue.main.async {
+                    completion(nil, NSError(domain: "无效的服务器响应", code: 0, userInfo: nil))
+                }
+                return
+            }
+            
+            do {
+                if let jsonObject = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                   let responseData = jsonObject["data"] as? [String: Any],
+                   let photoID = responseData["id"] as? String {
+                    DispatchQueue.main.async {
+                        completion(photoID, nil)
+                    }
+                } else {
+                    print("无法解析JSON数据或提取图片ID")
+                    DispatchQueue.main.async {
+                        completion(nil, NSError(domain: "数据解析失败", code: 0, userInfo: nil))
+                    }
+                }
+            } catch {
+                print("JSON解析错误: \(error.localizedDescription)")
+                DispatchQueue.main.async {
+                    completion(nil, error)
+                }
+            }
+        }.resume()
     }
 }
 

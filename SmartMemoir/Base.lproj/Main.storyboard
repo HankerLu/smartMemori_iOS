@@ -126,6 +126,15 @@
                                     <action selector="downloadPhotoFromRemoteServer:" destination="WhH-ZP-D41" eventType="touchUpInside" id="V7n-Ul-obT"/>
                                 </connections>
                             </button>
+                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="c9x-IK-5KV">
+                                <rect key="frame" x="53" y="132" width="79" height="35"/>
+                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                <state key="normal" title="Button"/>
+                                <buttonConfiguration key="configuration" style="plain" title="Upload"/>
+                                <connections>
+                                    <action selector="uploadPhotoToRemoteServer:" destination="WhH-ZP-D41" eventType="touchUpInside" id="Qnf-sE-LG3"/>
+                                </connections>
+                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="RQ6-yf-6jC"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
