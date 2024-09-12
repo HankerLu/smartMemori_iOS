@@ -8,7 +8,80 @@
 import UIKit
 import Speech
 
-
+class RemotePhotoService {
+    private let baseURL = "http://119.45.18.3:789"
+    private let imagePath = "/photograph/image/"
+    
+    /// 获取远程照片的URL
+    /// - Parameter photoID: 照片ID
+    /// - Returns: 完整的照片URL
+    func getPhotoURL(photoID: String) -> URL? {
+        return URL(string: baseURL + imagePath + photoID)
+    }
+    
+    /// 下载远程照片
+    /// - Parameters:
+    ///   - photoID: 照片ID
+    ///   - completion: 完成回调，返回下载的图片或错误
+    func downloadPhoto(photoID: String, completion: @escaping (UIImage?, Error?) -> Void) {
+        guard let url = getPhotoURL(photoID: photoID) else {
+            completion(nil, NSError(domain: "无效的URL", code: 0, userInfo: nil))
+            return
+        }
+        
+        URLSession.shared.dataTask(with: url) { data, response, error in
+            if let error = error {
+                completion(nil, error)
+                return
+            }
+            
+            guard let data = data, let image = UIImage(data: data) else {
+                completion(nil, NSError(domain: "无效的图片数据", code: 0, userInfo: nil))
+                return
+            }
+            
+            completion(image, nil)
+        }.resume()
+    }
+    
+    /// 上传照片到远程服务器
+    /// - Parameters:
+    ///   - image: 要上传的图片
+    ///   - completion: 完成回调，返回上传成功的照片ID或错误
+    func uploadPhoto(_ image: UIImage, completion: @escaping (String?, Error?) -> Void) {
+        guard let url = URL(string: baseURL + "/upload") else {
+            completion(nil, NSError(domain: "无效的上传URL", code: 0, userInfo: nil))
+            return
+        }
+        
+        guard let imageData = image.jpegData(compressionQuality: 0.8) else {
+            completion(nil, NSError(domain: "图片转换失败", code: 0, userInfo: nil))
+            return
+        }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "POST"
+        request.setValue("image/jpeg", forHTTPHeaderField: "Content-Type")
+        
+        let task = URLSession.shared.uploadTask(with: request, from: imageData) { data, response, error in
+            if let error = error {
+                completion(nil, error)
+                return
+            }
+            
+            guard let data = data,
+                  let responseString = String(data: data, encoding: .utf8),
+                  let photoID = responseString.components(separatedBy: "/").last else {
+                completion(nil, NSError(domain: "无效的服务器响应", code: 0, userInfo: nil))
+                return
+            }
+            
+            completion(photoID, nil)
+        }
+        
+        task.resume()
+    }
+}
 
 class MainViewController: UIViewController, UIImagePickerControllerDelegate & UINavigationControllerDelegate, URLSessionDataDelegate {
 
@@ -184,7 +257,7 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
     func sentZhipuAIMessageWithContentStream() {
         var final_content = ""
         do {
-            let photoDatabaseInfo = try JSONSerialization.data(withJSONObject: photoDatabase, options: [])
+            _ = try JSONSerialization.data(withJSONObject: photoDatabase, options: [])
             
             // let photoDatabaseInfoString = String(data: photoDatabaseInfo, encoding: .utf8) ?? ""
             // print("----------photoDatabaseInfoString:", photoDatabaseInfoString)
@@ -632,6 +705,40 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
                 }
             } catch {
                 print("Error while enumerating files \(documentsDirectory.path): \(error.localizedDescription)")
+            }
+        }
+    }
+
+    @IBAction func uploadPhotoToRemoteServer(_ sender: UIButton) {
+        guard let image = mainImageView.image else {
+            print("没有图片可上传")
+            return
+        }
+        
+        let remotePhotoService = RemotePhotoService()
+        remotePhotoService.uploadPhoto(image) { [weak self] (photoID, error) in
+            if let error = error {
+                print("上传照片时出错: \(error)")
+            } else if let photoID = photoID {
+                print("照片已成功上传，ID为: \(photoID)")
+                // 更新UI或执行其他操作
+            }
+        }
+    }
+
+    @IBAction func downloadPhotoFromRemoteServer(_ sender: UIButton) {
+        guard let photoID = currentPhotoFileName else {
+            print("没有照片ID可下载")
+            return
+        }
+        
+        let remotePhotoService = RemotePhotoService()
+        remotePhotoService.downloadPhoto(photoID: photoID) { [weak self] (image, error) in
+            if let error = error {
+                print("下载照片时出错: \(error)")
+            } else if let image = image {
+                self?.mainImageView.image = image
+                print("照片已成功下载并显示")
             }
         }
     }
