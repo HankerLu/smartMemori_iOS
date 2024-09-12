@@ -9,6 +9,7 @@ import UIKit
 import Speech
 
 
+
 class MainViewController: UIViewController, UIImagePickerControllerDelegate & UINavigationControllerDelegate, URLSessionDataDelegate {
 
     @IBOutlet weak var mainImageView: UIImageView!
@@ -129,7 +130,7 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
         // 等待completeDataStreamStatus为2后，调用displayPhotoByAIResult
         DispatchQueue.global().async {
             while self.completeDataStreamStatus != 2 {
-                usleep(100000) // 每0.1秒检查一次
+                usleep(100000) //  每0.1秒检查一次
             }
             DispatchQueue.main.async {
                 self.displayPhotoByAIResult(aiResult: self.completeDataStream)
@@ -681,5 +682,65 @@ class LongTermIncentiveManager {
         for (tag, points) in incentives {
             print("标签: '\(tag)', 激励点数: \(points)")
         }
+    }
+}
+
+/// 负责通过SSH将照片传输到局域网内远程嵌入式系统的类
+class PhotoSSHTransfer {
+    private let sshSession: Any?
+    
+    init(host: String, port: Int, username: String, password: String) {
+        // 注意:这里需要导入适当的SSH库并正确初始化SSH会话
+        // 以下代码仅作为示例,实际使用时需要替换为真实的SSH库实现
+        self.sshSession = nil
+        print("SSH会话初始化 - 主机: \(host), 端口: \(port), 用户名: \(username)")
+    }
+    
+    /// 传输单张照片到远程系统
+    /// - Parameters:
+    ///   - localPath: 本地照片路径
+    ///   - remotePath: 远程存储路径
+    /// - Returns: 是否传输成功
+    func transferSinglePhoto(localPath: String, remotePath: String) -> Bool {
+        // 实现SSH文件传输逻辑
+        print("模拟照片传输 - 本地路径: \(localPath), 远程路径: \(remotePath)")
+        return true
+    }
+    
+    /// 批量传输照片到远程系统
+    /// - Parameter photos: 包含本地路径和远程路径的照片字典
+    /// - Returns: 成功传输的照片数量
+    func batchTransferPhotos(photos: [(local: String, remote: String)]) -> Int {
+        var successCount = 0
+        for photo in photos {
+            if transferSinglePhoto(localPath: photo.local, remotePath: photo.remote) {
+                successCount += 1
+            }
+        }
+        print("批量传输完成，成功传输 \(successCount) 张照片")
+        return successCount
+    }
+    
+    /// 检查远程系统的可用存储空间
+    /// - Returns: 可用空间大小（字节）
+    func checkRemoteStorageSpace() -> Int64? {
+        // 实现检查远程存储空间的逻辑
+        print("模拟检查远程存储空间")
+        return 1024 * 1024 * 1024 // 假设1GB可用空间
+    }
+    
+    /// 在远程系统创建目录
+    /// - Parameter path: 要创建的目录路径
+    /// - Returns: 是否创建成功
+    func createRemoteDirectory(path: String) -> Bool {
+        // 实现创建远程目录的逻辑
+        print("模拟创建远程目录: \(path)")
+        return true
+    }
+    
+    /// 关闭SSH会话
+    func closeConnection() {
+        // 实现关闭SSH会话的逻辑
+        print("模拟关闭SSH会话")
     }
 }
