@@ -10,7 +10,7 @@ import Speech
 //import SwiftSH
 class RemotePhotoService {
     private let baseURL = "http://119.45.18.3:789"
-    private let imagePath = "/photograph/image/"
+    private let imagePath = "/photograph/oss/"
     
     /// 获取远程照片的URL
     /// - Parameter photoID: 照片ID
@@ -103,7 +103,7 @@ class RemotePhotoService {
     ///   - photoID: 照片ID
     ///   - completion: 完成回调，返回下载的图片或错误
     func downloadPhoto(photoID: String, completion: @escaping (UIImage?, Error?) -> Void) {
-        guard let url = getPhotoURL(photoID: photoID) else {
+        guard let url = URL(string: "http://119.45.18.3:789/photograph/oss/getImageInfo?imageId=\(photoID)") else {
             completion(nil, NSError(domain: "无效的URL", code: 0, userInfo: nil))
             return
         }
@@ -115,38 +115,46 @@ class RemotePhotoService {
                 }
                 return
             }
-            print("下载照片成功")
-            if let data = data {
-                print("返回的完整数据: \(String(data: data, encoding: .utf8) ?? "无法解码数据")")
-            } else {
-                print("返回的数据为空")
-            }
-                
+            
             guard let data = data else {
                 DispatchQueue.main.async {
-                    completion(nil, NSError(domain: "无效的图片数据", code: 0, userInfo: nil))
+                    completion(nil, NSError(domain: "无效的服务器响应", code: 0, userInfo: nil))
                 }
                 return
             }
             
-            // 将返回的数据解析为字符串
             do {
-                if let jsonObject = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
-                   let responseData = jsonObject["data"] as? [String: Any],
-                   let base64String = responseData["imageData"] as? String,
-                   let imageData = Data(base64Encoded: base64String),
-                   let image = UIImage(data: imageData) {
-                    DispatchQueue.main.async {
-                        completion(image, nil)
-                    }
+                if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                   let responseData = json["data"] as? [String: Any],
+                   let image = responseData["image"] as? [String: Any],
+                   let imageUrl = image["img"] as? String,
+                   let downloadUrl = URL(string: imageUrl) {
+                    
+                    URLSession.shared.dataTask(with: downloadUrl) { imageData, _, error in
+                        if let error = error {
+                            DispatchQueue.main.async {
+                                completion(nil, error)
+                            }
+                            return
+                        }
+                        
+                        if let imageData = imageData, let image = UIImage(data: imageData) {
+                            DispatchQueue.main.async {
+                                completion(image, nil)
+                            }
+                        } else {
+                            DispatchQueue.main.async {
+                                completion(nil, NSError(domain: "图片数据无效", code: 0, userInfo: nil))
+                            }
+                        }
+                    }.resume()
+                    
                 } else {
-                    print("无法解析JSON数据或提取图像数据")
                     DispatchQueue.main.async {
                         completion(nil, NSError(domain: "数据解析失败", code: 0, userInfo: nil))
                     }
                 }
             } catch {
-                print("JSON解析错误: \(error.localizedDescription)")
                 DispatchQueue.main.async {
                     completion(nil, error)
                 }
@@ -882,13 +890,13 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
 
     @IBOutlet weak var downloadPhotoButton: UIButton!
     @IBAction func downloadPhotoFromRemoteServer(_ sender: UIButton) {
-        let photoID = "fbbfc324c3adc5449cdd1e381fb9b35e"
+        let photoID = "e21d0cd4b8c047e980f11138e7a5be84"
         guard !photoID.isEmpty else {
             print("没有照片ID可下载")
             return
         }
         
-#if false
+#if true
         let remotePhotoService = RemotePhotoService()
         remotePhotoService.downloadPhoto(photoID: photoID) { [weak self] (image, error) in
             if let error = error {
