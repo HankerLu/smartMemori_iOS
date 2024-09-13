@@ -167,7 +167,7 @@ class RemotePhotoService {
     ///   - image: 要上传的图片
     ///   - completion: 完成回调，返回上传成功的照片ID或错误
     func uploadPhoto(_ image: UIImage, completion: @escaping (String?, Error?) -> Void) {
-        guard let url = URL(string: "\(baseURL)/photograph/image/upload?userId=123456") else {
+        guard let url = URL(string: "http://119.45.18.3:789/photograph/oss/uploadImag?userId=123456") else {
             completion(nil, NSError(domain: "无效的上传URL", code: 0, userInfo: nil))
             return
         }
@@ -177,7 +177,6 @@ class RemotePhotoService {
             return
         }
         print("imageData: \(imageData)")
-        
         
         var request = URLRequest(url: url)
         request.httpMethod = "POST"
@@ -195,7 +194,6 @@ class RemotePhotoService {
         
         // 结束分隔符
         body.append("--\(boundary)--\r\n".data(using: .utf8)!)
-        
         
         request.httpBody = body
         
@@ -224,7 +222,7 @@ class RemotePhotoService {
                    let success = jsonObject["success"] as? Bool,
                    success,
                    let responseData = jsonObject["data"] as? [String: Any],
-                   let imageId = responseData["imageId"] as? String {
+                   let imageId = responseData["image_id"] as? String {
                     DispatchQueue.main.async {
                         completion(imageId, nil)
                     }
@@ -890,7 +888,7 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
 
     @IBOutlet weak var downloadPhotoButton: UIButton!
     @IBAction func downloadPhotoFromRemoteServer(_ sender: UIButton) {
-        let photoID = "e21d0cd4b8c047e980f11138e7a5be84"
+        let photoID = "07281fa975ef4cd8b97f22b9ce75b7f6"
         guard !photoID.isEmpty else {
             print("没有照片ID可下载")
             return
