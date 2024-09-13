@@ -18,6 +18,85 @@ class RemotePhotoService {
     func getPhotoURL(photoID: String) -> URL? {
         return URL(string: baseURL + imagePath + photoID)
     }
+
+    /// 从远程服务器下载完整图片
+    /// - Parameters:
+    ///   - imageID: 图片ID
+    ///   - completion: 完成回调，返回下载的图片或错误
+    func fetchCompleteImage(imageID: String, completion: @escaping (UIImage?, String?, Error?) -> Void) {
+        let baseURL = "http://119.45.18.3:789/photograph/image/"
+        let chunkSize = 5 * 1024 * 1024 // 每块5MB
+        var start = 0
+        var imageData = Data()
+        var totalSize = 0
+        var fileName: String?
+
+        func fetchNextChunk() {
+            let urlString = "\(baseURL)\(imageID)/chunk"
+            var components = URLComponents(string: urlString)
+            components?.queryItems = [
+                URLQueryItem(name: "start", value: "\(start)"),
+                URLQueryItem(name: "size", value: "\(chunkSize)")
+            ]
+            
+            guard let url = components?.url else {
+                completion(nil, nil, NSError(domain: "无效的URL", code: 0, userInfo: nil))
+                return
+            }
+            
+            URLSession.shared.dataTask(with: url) { data, response, error in
+                if let error = error {
+                    completion(nil, nil, error)
+                    return
+                }
+                
+                guard let data = data else {
+                    completion(nil, nil, NSError(domain: "无效的数据", code: 0, userInfo: nil))
+                    return
+                }
+                
+                do {
+                    if let json = try JSONSerialization.jsonObject(with: data, options: []) as? [String: Any],
+                       let responseData = json["data"] as? [String: Any],
+                       let chunk = responseData["chunk"] as? String,
+                       let chunkData = Data(base64Encoded: chunk) {
+                        
+                        imageData.append(chunkData)
+                        
+                        start = responseData["end"] as? Int ?? 0
+                        totalSize = responseData["total"] as? Int ?? 0
+                        
+                        if fileName == nil, let name = responseData["fileName"] as? String {
+                            fileName = name
+                        }
+                        
+                        let progress = Double(start) / Double(totalSize) * 100
+                        print("下载进度: \(String(format: "%.2f", progress))%")
+                        
+                        if start >= totalSize {
+                            if abs(imageData.count - totalSize) <= 10 {
+                                if let image = UIImage(data: imageData) {
+                                    completion(image, fileName, nil)
+                                } else {
+                                    completion(nil, nil, NSError(domain: "图片创建失败", code: 0, userInfo: nil))
+                                }
+                            } else {
+                                completion(nil, nil, NSError(domain: "图片数据不完整", code: 0, userInfo: nil))
+                            }
+                        } else {
+                            fetchNextChunk()
+                        }
+                    } else {
+                        completion(nil, nil, NSError(domain: "数据解析失败", code: 0, userInfo: nil))
+                    }
+                } catch {
+                    completion(nil, nil, error)
+                }
+            }.resume()
+        }
+        
+        fetchNextChunk()
+    }
     
     /// 下载远程照片
     /// - Parameters:
@@ -803,12 +882,13 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
 
     @IBOutlet weak var downloadPhotoButton: UIButton!
     @IBAction func downloadPhotoFromRemoteServer(_ sender: UIButton) {
-        let photoID = "d06ef4e5900ed514778748f33ee49869"
+        let photoID = "fbbfc324c3adc5449cdd1e381fb9b35e"
         guard !photoID.isEmpty else {
             print("没有照片ID可下载")
             return
         }
         
+#if false
         let remotePhotoService = RemotePhotoService()
         remotePhotoService.downloadPhoto(photoID: photoID) { [weak self] (image, error) in
             if let error = error {
@@ -818,6 +898,24 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
                 print("照片已成功下载并显示")
             }
         }
+#else
+        let remotePhotoService = RemotePhotoService()
+        remotePhotoService.fetchCompleteImage(imageID: photoID) { [weak self] (image, fileName, error) in
+            if let error = error {
+                print("下载照片时出错: \(error.localizedDescription)")
+            } else if let image = image {
+                DispatchQueue.main.async {
+                    self?.mainImageView.image = image
+                    print("照片已成功下载并显示")
+                    if let fileName = fileName {
+                        print("下载的文件名: \(fileName)")
+                    }
+                }
+            } else {
+                print("下载失败,未收到图片数据")
+            }
+        }
+#endif
     }
 
     override func viewDidLoad() {
