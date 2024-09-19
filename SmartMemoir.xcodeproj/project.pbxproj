@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		365893AA2C9C603700DA97DE /* IMG_3967.jpeg in Resources */ = {isa = PBXBuildFile; fileRef = 365893A62C9C603700DA97DE /* IMG_3967.jpeg */; };
+		365893AB2C9C603700DA97DE /* IMG_4328.jpeg in Resources */ = {isa = PBXBuildFile; fileRef = 365893A72C9C603700DA97DE /* IMG_4328.jpeg */; };
+		365893AC2C9C603700DA97DE /* IMG_4378.jpeg in Resources */ = {isa = PBXBuildFile; fileRef = 365893A82C9C603700DA97DE /* IMG_4378.jpeg */; };
 		36DDD8482C7F0A21000AB622 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 36DDD8472C7F0A21000AB622 /* AppDelegate.swift */; };
 		36DDD84A2C7F0A21000AB622 /* GameScene.sks in Resources */ = {isa = PBXBuildFile; fileRef = 36DDD8492C7F0A21000AB622 /* GameScene.sks */; };
 		36DDD84C2C7F0A21000AB622 /* Actions.sks in Resources */ = {isa = PBXBuildFile; fileRef = 36DDD84B2C7F0A21000AB622 /* Actions.sks */; };
@@ -20,6 +23,9 @@
 
 /* Begin PBXFileReference section */
 		0081FD6DD4D2617EBE84D697 /* Pods-SmartMemoir.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-SmartMemoir.debug.xcconfig"; path = "Target Support Files/Pods-SmartMemoir/Pods-SmartMemoir.debug.xcconfig"; sourceTree = "<group>"; };
+		365893A62C9C603700DA97DE /* IMG_3967.jpeg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = IMG_3967.jpeg; sourceTree = "<group>"; };
+		365893A72C9C603700DA97DE /* IMG_4328.jpeg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = IMG_4328.jpeg; sourceTree = "<group>"; };
+		365893A82C9C603700DA97DE /* IMG_4378.jpeg */ = {isa = PBXFileReference; lastKnownFileType = image.jpeg; path = IMG_4378.jpeg; sourceTree = "<group>"; };
 		3680473A2C928F910057B687 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		36DDD8442C7F0A21000AB622 /* SmartMemoir.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SmartMemoir.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		36DDD8472C7F0A21000AB622 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
@@ -55,6 +61,16 @@
 			path = Pods;
 			sourceTree = "<group>";
 		};
+		365893A92C9C603700DA97DE /* test_photo */ = {
+			isa = PBXGroup;
+			children = (
+				365893A62C9C603700DA97DE /* IMG_3967.jpeg */,
+				365893A72C9C603700DA97DE /* IMG_4328.jpeg */,
+				365893A82C9C603700DA97DE /* IMG_4378.jpeg */,
+			);
+			path = test_photo;
+			sourceTree = SOURCE_ROOT;
+		};
 		36DDD83B2C7F0A21000AB622 = {
 			isa = PBXGroup;
 			children = (
@@ -76,6 +92,7 @@
 		36DDD8462C7F0A21000AB622 /* SmartMemoir */ = {
 			isa = PBXGroup;
 			children = (
+				365893A92C9C603700DA97DE /* test_photo */,
 				3680473A2C928F910057B687 /* Info.plist */,
 				36DDD8472C7F0A21000AB622 /* AppDelegate.swift */,
 				36DDD8492C7F0A21000AB622 /* GameScene.sks */,
@@ -158,7 +175,10 @@
 			buildActionMask = 2147483647;
 			files = (
 				36DDD84A2C7F0A21000AB622 /* GameScene.sks in Resources */,
+				365893AB2C9C603700DA97DE /* IMG_4328.jpeg in Resources */,
 				36DDD8532C7F0A21000AB622 /* Base in Resources */,
+				365893AC2C9C603700DA97DE /* IMG_4378.jpeg in Resources */,
+				365893AA2C9C603700DA97DE /* IMG_3967.jpeg in Resources */,
 				36DDD8552C7F0A22000AB622 /* Assets.xcassets in Resources */,
 				36DDD84C2C7F0A21000AB622 /* Actions.sks in Resources */,
 				36DDD8582C7F0A22000AB622 /* Base in Resources */,

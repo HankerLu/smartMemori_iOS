@@ -253,10 +253,42 @@ class MainViewController: UIViewController, UIImagePickerControllerDelegate & UI
     @IBOutlet weak var randomPhotoButton: UIButton!
     
     @IBAction func selectButtonTapped(_ sender: UIButton) {
+        #if true
+        // 获取项目的主Bundle
+        let bundle = Bundle.main
+        
+        // 获取bundle中所有资源的路径
+        if let resourcePaths = bundle.paths(forResourcesOfType: nil, inDirectory: nil) as? [String] {
+            // 过滤出jpg和jpeg文件
+            let imageFiles = resourcePaths.filter { path in
+                let pathExtension = (path as NSString).pathExtension.lowercased()
+                return pathExtension == "jpg" || pathExtension == "jpeg"
+            }
+            
+            if !imageFiles.isEmpty {
+                // 随机选择一张图片
+                if let randomImagePath = imageFiles.randomElement(),
+                   let image = UIImage(contentsOfFile: randomImagePath) {
+                    // 在主线程更新UI
+                    DispatchQueue.main.async {
+                        self.mainImageView.image = image
+                        print("已显示随机选择的图片：\(randomImagePath)")
+                    }
+                } else {
+                    print("无法加载选中的图片")
+                }
+            } else {
+                print("未找到jpg或jpeg文件")
+            }
+        } else {
+            print("无法获取资源路径")
+        }
+        #else
         let imagePicker = UIImagePickerController()
         imagePicker.delegate = self
         imagePicker.sourceType = .photoLibrary
         present(imagePicker, animated: true, completion: nil)
+        #endif
     }
 
     @IBAction func debugListButtonTapped(_ sender: UIButton) {
